@@ -1,0 +1,483 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top, #111827, #020617 55%, #000 100%);
+  color: #e5e7eb;
+  min-height: 100vh;
+}
+
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  color: #e5e7eb;
+}
+
+.app-header {
+  text-align: center;
+  padding: 24px 16px 8px;
+}
+
+.app-header h1 {
+  margin: 0 0 8px;
+  font-weight: 700;
+  font-size: clamp(1.8rem, 2.6vw, 2.4rem);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.app-header p {
+  margin: 0;
+  font-size: 0.95rem;
+  color: #9ca3af;
+}
+
+.app-footer {
+  padding: 12px 16px 20px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.calendar-3d-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 12px 8px 24px;
+}
+
+.calendar-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.calendar-controls button {
+  border: none;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #22c55e, #16a34a);
+  color: white;
+  font-weight: 500;
+  cursor: pointer;
+  font-size: 0.9rem;
+  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.35);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
+}
+
+.calendar-controls button:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.05);
+  box-shadow: 0 12px 26px rgba(16, 185, 129, 0.55);
+}
+
+.calendar-controls button:active {
+  transform: translateY(1px) scale(0.99);
+  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.45);
+}
+
+.calendar-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.year-label {
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #facc15;
+  font-size: 0.8rem;
+}
+
+.month-info {
+  font-size: 0.9rem;
+  color: #d1d5db;
+}
+
+.calendar-3d-viewport {
+  position: relative;
+  width: 100%;
+  max-width: 1080px;
+  height: min(520px, 70vh);
+  perspective: 1400px;
+  margin: 0 auto;
+  overflow: visible;
+}
+
+.calendar-book-viewport {
+  position: relative;
+  width: 100%;
+  max-width: 980px;
+  height: min(640px, 78vh);
+  margin: 0 auto;
+  perspective: 1600px;
+  padding-top: 46px; /* chừa chỗ lò xo */
+}
+
+.calendar-book-viewport::before {
+  content: "";
+  position: absolute;
+  top: 34px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, 92%);
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(226, 232, 240, 0.14), rgba(15, 23, 42, 0.4));
+  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.calendar-spiral {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(760px, 92%);
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 18px;
+  pointer-events: none;
+}
+
+.spiral-ring {
+  width: 40px;
+  height: 26px;
+  border-radius: 999px;
+  border: 3px solid rgba(226, 232, 240, 0.55);
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.35),
+    0 10px 22px rgba(0, 0, 0, 0.35);
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.22), rgba(15, 23, 42, 0.18));
+}
+
+.page-stage {
+  position: relative;
+  width: min(760px, 92%);
+  height: 100%;
+  margin: 0 auto;
+  transform-style: preserve-3d;
+  overflow: hidden;
+  border-radius: 22px;
+}
+
+.page {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transform-origin: center top;
+  display: grid;
+  place-items: center;
+}
+
+.page.under {
+  opacity: 0;
+  transform: translateZ(-2px) rotateX(0deg);
+  filter: saturate(0.99) brightness(0.99);
+}
+
+.page-stage.is-turning .page.under {
+  opacity: 1;
+  transform: translateZ(-2px) rotateX(4deg);
+}
+
+.page.top {
+  transform: translateZ(2px);
+}
+
+.page.top.turn-next {
+  animation: pageTurnUp 650ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+.page.top.turn-prev {
+  animation: pageTurnUp 650ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+
+@keyframes pageTurnUp {
+  0% {
+    transform: translateZ(2px) rotateX(0deg);
+    filter: drop-shadow(0 26px 55px rgba(0, 0, 0, 0.55));
+  }
+  100% {
+    transform: translateZ(2px) rotateX(-155deg);
+    filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.35));
+  }
+}
+
+.calendar-3d-wheel {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.9s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.month-card-positioner {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform-style: preserve-3d;
+  transform-origin: center center;
+}
+
+.month-card-wrapper {
+  width: min(760px, 92%);
+  height: min(560px, 72vh);
+  transform-style: preserve-3d;
+  transition: transform 0.5s ease, filter 0.5s ease;
+  cursor: pointer;
+}
+
+.month-card-wrapper.active {
+  transform: none;
+  filter: drop-shadow(0 22px 60px rgba(0, 0, 0, 0.55));
+}
+
+.month-card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.7s ease;
+}
+
+.month-card-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.month-card-face {
+  position: absolute;
+  inset: 0;
+  border-radius: 22px;
+  overflow: hidden;
+  backface-visibility: hidden;
+  background: radial-gradient(circle at top, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.92));
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow:
+    0 40px 90px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.55);
+}
+
+.month-card-front {
+  display: flex;
+  flex-direction: column;
+}
+
+.month-image {
+  flex: 0 0 42%;
+  position: relative;
+  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.85));
+}
+
+.month-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  filter: blur(18px);
+  transform: scale(1.08);
+  opacity: 0.9;
+}
+
+.month-image-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  z-index: 0;
+}
+
+.month-image::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.05) 62%, transparent);
+  z-index: 1;
+}
+
+.month-overlay {
+  position: absolute;
+  inset: auto 14px 14px;
+  z-index: 2;
+}
+
+.month-overlay h2 {
+  margin: 0 0 4px;
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.month-overlay p {
+  margin: 0;
+  font-size: 0.8rem;
+  color: #e5e7eb;
+}
+
+.month-meta {
+  padding: 10px 14px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: linear-gradient(
+    to right,
+    rgba(2, 6, 23, 0.92),
+    rgba(15, 23, 42, 0.9)
+  );
+}
+
+.month-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #f97316;
+}
+
+.month-topic {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-align: right;
+}
+
+.month-card-back {
+  transform: rotateY(180deg);
+  display: flex;
+  flex-direction: column;
+  background: radial-gradient(circle at top, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.92));
+}
+
+.month-back-header {
+  padding: 10px 14px 4px;
+}
+
+.month-back-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: #0f172a;
+}
+
+.month-back-header p {
+  margin: 4px 0 0;
+  font-size: 0.8rem;
+  color: rgba(15, 23, 42, 0.7);
+}
+
+.month-calendar-grid {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 4px 10px 8px;
+}
+
+.weekdays-row {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: 4px;
+}
+
+.weekday-cell {
+  text-align: center;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: rgba(15, 23, 42, 0.65);
+}
+
+.days-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+
+.day-cell {
+  position: relative;
+  min-height: 28px;
+  border-radius: 6px;
+  background: rgba(2, 6, 23, 0.06);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: rgba(15, 23, 42, 0.9);
+}
+
+.day-cell.empty {
+  background: transparent;
+}
+
+.day-cell.holiday {
+  background: radial-gradient(circle at top, rgba(251, 191, 36, 0.25), rgba(248, 113, 113, 0.18));
+  color: rgba(153, 27, 27, 0.95);
+}
+
+.day-number {
+  font-weight: 600;
+}
+
+.day-lunar {
+  font-size: 0.55rem;
+  color: rgba(15, 23, 42, 0.55);
+}
+
+.day-holiday-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: #f97316;
+  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.35);
+}
+
+.month-back-footer {
+  padding: 4px 10px 10px;
+  font-size: 0.7rem;
+  color: rgba(15, 23, 42, 0.6);
+}
+
+.calendar-hint {
+  margin-top: 12px;
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-align: center;
+  padding: 0 16px;
+}
+
+@media (max-width: 900px) {
+  .month-card-wrapper {
+    height: min(540px, 72vh);
+  }
+}
+
+@media (max-width: 640px) {
+  .calendar-controls {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .month-card-wrapper {
+    height: min(520px, 76vh);
+  }
+}
+

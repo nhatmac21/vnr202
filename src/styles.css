@@ -1,483 +1,563 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+@import "tailwindcss";
+
+/* Small global tweaks */
+html,
+body,
+#root {
+  height: 100%;
 }
 
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: radial-gradient(circle at top, #111827, #020617 55%, #000 100%);
-  color: #e5e7eb;
-  min-height: 100vh;
+canvas {
+  outline: none;
 }
 
-.app-root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  justify-content: flex-start;
-  color: #e5e7eb;
-}
-
-.app-header {
-  text-align: center;
-  padding: 24px 16px 8px;
-}
-
-.app-header h1 {
-  margin: 0 0 8px;
-  font-weight: 700;
-  font-size: clamp(1.8rem, 2.6vw, 2.4rem);
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.app-header p {
-  margin: 0;
-  font-size: 0.95rem;
-  color: #9ca3af;
-}
-
-.app-footer {
-  padding: 12px 16px 20px;
-  text-align: center;
-  font-size: 0.8rem;
-  color: #6b7280;
-}
-
-.calendar-3d-section {
+/* ---- Lịch để bàn khổ ngang + 3D ---- */
+.desk-calendar {
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start;
-  padding: 12px 8px 24px;
+  padding: 20px 16px 28px;
 }
 
-.calendar-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.calendar-controls button {
-  border: none;
-  padding: 8px 14px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, #22c55e, #16a34a);
-  color: white;
-  font-weight: 500;
-  cursor: pointer;
-  font-size: 0.9rem;
-  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.35);
-  transition: transform 0.18s ease, box-shadow 0.18s ease, filter 0.18s ease;
-}
-
-.calendar-controls button:hover {
-  transform: translateY(-1px);
-  filter: brightness(1.05);
-  box-shadow: 0 12px 26px rgba(16, 185, 129, 0.55);
-}
-
-.calendar-controls button:active {
-  transform: translateY(1px) scale(0.99);
-  box-shadow: 0 4px 10px rgba(16, 185, 129, 0.45);
-}
-
-.calendar-info {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-}
-
-.year-label {
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: #facc15;
-  font-size: 0.8rem;
-}
-
-.month-info {
-  font-size: 0.9rem;
-  color: #d1d5db;
-}
-
-.calendar-3d-viewport {
+/* Scene 3D: perspective + nghiêng nhẹ để thấy chiều sâu */
+.desk-calendar-scene {
   position: relative;
   width: 100%;
-  max-width: 1080px;
-  height: min(520px, 70vh);
-  perspective: 1400px;
-  margin: 0 auto;
-  overflow: visible;
+  max-width: 720px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
 }
 
-.calendar-book-viewport {
+.desk-calendar-scene:active {
+  cursor: grabbing;
+}
+
+.desk-calendar-3d {
+  perspective: 2200px;
+  transform-style: preserve-3d;
+  transform: perspective(2200px) rotateX(8deg) rotateY(0deg);
+}
+
+.desk-calendar-3d .desk-pages {
+  transform-style: preserve-3d;
+  transform: translateZ(0);
+}
+
+/* ---- Metaverse shell (xoay xem mọi mặt) ---- */
+.metaverse-shell {
   position: relative;
   width: 100%;
-  max-width: 980px;
-  height: min(640px, 78vh);
-  margin: 0 auto;
-  perspective: 1600px;
-  padding-top: 46px; /* chừa chỗ lò xo */
+  transform-style: preserve-3d;
+  transform: rotateX(var(--orbit-rx, 12deg)) rotateY(var(--orbit-ry, -18deg));
 }
 
-.calendar-book-viewport::before {
-  content: "";
+.metaverse-face {
   position: absolute;
-  top: 34px;
   left: 50%;
-  transform: translateX(-50%);
-  width: min(760px, 92%);
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(180deg, rgba(226, 232, 240, 0.14), rgba(15, 23, 42, 0.4));
-  box-shadow: 0 18px 45px rgba(0, 0, 0, 0.45);
-  pointer-events: none;
+  transform-style: preserve-3d;
 }
 
-.calendar-spiral {
-  position: absolute;
-  top: 14px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(760px, 92%);
-  height: 38px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 18px;
-  pointer-events: none;
+.metaverse-top {
+  top: 6px;
+  width: 94%;
+  height: 18px;
+  transform: translateX(-50%) translateZ(-28px) rotateX(90deg);
+  transform-origin: center;
+  border-radius: 10px;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.14), rgba(0, 0, 0, 0.05));
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
 }
 
-.spiral-ring {
-  width: 40px;
-  height: 26px;
-  border-radius: 999px;
-  border: 3px solid rgba(226, 232, 240, 0.55);
+.metaverse-bottom {
+  bottom: 30px;
+  width: 88%;
+  height: 70px;
+  transform: translateX(-50%) translateZ(-50px) rotateX(90deg);
+  transform-origin: center;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(28, 25, 23, 0.55), rgba(28, 25, 23, 0.15));
+  box-shadow: 0 40px 90px rgba(0, 0, 0, 0.28);
+}
+
+.metaverse-back {
+  top: 60px;
+  width: 90%;
+  height: 220px;
+  transform: translateX(-50%) translateZ(-70px) rotateY(180deg);
+  border-radius: 18px;
+  background: linear-gradient(180deg, #1c1917 0%, #292524 65%, #0c0a09 100%);
   box-shadow:
-    inset 0 2px 0 rgba(255, 255, 255, 0.35),
-    inset 0 -2px 0 rgba(0, 0, 0, 0.35),
-    0 10px 22px rgba(0, 0, 0, 0.35);
-  background: linear-gradient(180deg, rgba(148, 163, 184, 0.22), rgba(15, 23, 42, 0.18));
+    0 40px 90px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.page-stage {
-  position: relative;
-  width: min(760px, 92%);
+.metaverse-back-mark {
   height: 100%;
-  margin: 0 auto;
-  transform-style: preserve-3d;
-  overflow: hidden;
-  border-radius: 22px;
-}
-
-.page {
-  position: absolute;
-  inset: 0;
-  transform-style: preserve-3d;
-  transform-origin: center top;
   display: grid;
-  place-items: center;
+  place-content: center;
+  gap: 6px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
 }
 
-.page.under {
-  opacity: 0;
-  transform: translateZ(-2px) rotateX(0deg);
-  filter: saturate(0.99) brightness(0.99);
+.metaverse-back-title {
+  font-weight: 800;
+  letter-spacing: 0.08em;
 }
 
-.page-stage.is-turning .page.under {
-  opacity: 1;
-  transform: translateZ(-2px) rotateX(4deg);
+.metaverse-back-sub {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.7);
 }
 
-.page.top {
-  transform: translateZ(2px);
-}
-
-.page.top.turn-next {
-  animation: pageTurnUp 650ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
-}
-
-.page.top.turn-prev {
-  animation: pageTurnUp 650ms cubic-bezier(0.2, 0.9, 0.2, 1) both;
-}
-
-@keyframes pageTurnUp {
-  0% {
-    transform: translateZ(2px) rotateX(0deg);
-    filter: drop-shadow(0 26px 55px rgba(0, 0, 0, 0.55));
-  }
-  100% {
-    transform: translateZ(2px) rotateX(-155deg);
-    filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.35));
-  }
-}
-
-.calendar-3d-wheel {
-  width: 100%;
-  height: 100%;
+.metaverse-front {
   position: relative;
   transform-style: preserve-3d;
-  transition: transform 0.9s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-.month-card-positioner {
+/* Gáy lò xo phía trên */
+.desk-spiral {
   position: absolute;
-  top: 50%;
+  top: 0;
   left: 50%;
-  transform-style: preserve-3d;
-  transform-origin: center center;
-}
-
-.month-card-wrapper {
-  width: min(760px, 92%);
-  height: min(560px, 72vh);
-  transform-style: preserve-3d;
-  transition: transform 0.5s ease, filter 0.5s ease;
-  cursor: pointer;
-}
-
-.month-card-wrapper.active {
-  transform: none;
-  filter: drop-shadow(0 22px 60px rgba(0, 0, 0, 0.55));
-}
-
-.month-card-inner {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  transform-style: preserve-3d;
-  transition: transform 0.7s ease;
-}
-
-.month-card-inner.flipped {
-  transform: rotateY(180deg);
-}
-
-.month-card-face {
-  position: absolute;
-  inset: 0;
-  border-radius: 22px;
-  overflow: hidden;
-  backface-visibility: hidden;
-  background: radial-gradient(circle at top, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.92));
-  border: 1px solid rgba(148, 163, 184, 0.35);
+  transform: translateX(-50%);
+  width: 94%;
+  height: 26px;
+  z-index: 10;
+  background: linear-gradient(180deg, #1c1917 0%, #292524 50%, #1c1917 100%);
+  border-radius: 0 0 12px 12px;
   box-shadow:
-    0 40px 90px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.55);
-}
-
-.month-card-front {
-  display: flex;
-  flex-direction: column;
-}
-
-.month-image {
-  flex: 0 0 42%;
-  position: relative;
-  background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(2, 6, 23, 0.85));
-}
-
-.month-image::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: inherit;
-  filter: blur(18px);
-  transform: scale(1.08);
-  opacity: 0.9;
-}
-
-.month-image-img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  object-position: center;
-  z-index: 0;
-}
-
-.month-image::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.82), rgba(0, 0, 0, 0.05) 62%, transparent);
-  z-index: 1;
-}
-
-.month-overlay {
-  position: absolute;
-  inset: auto 14px 14px;
-  z-index: 2;
-}
-
-.month-overlay h2 {
-  margin: 0 0 4px;
-  font-size: 1.15rem;
-  font-weight: 600;
-}
-
-.month-overlay p {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #e5e7eb;
-}
-
-.month-meta {
-  padding: 10px 14px 12px;
+    0 6px 16px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  justify-content: space-around;
+  padding: 0 10px;
+}
+
+.desk-spiral::before,
+.desk-spiral::after {
+  content: "";
+  width: 10px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid #57534e;
+  background: transparent;
+}
+
+/* Khối trang khổ ngang */
+.desk-pages {
+  position: relative;
+  width: 94%;
+  margin: 0 auto;
+  padding-top: 22px;
+  min-height: 0;
+}
+
+.desk-page-under {
+  position: absolute;
+  top: 22px;
+  left: 0;
+  right: 0;
+  z-index: 0;
+  border-radius: 0 0 14px 14px;
+  overflow: hidden;
+  box-shadow:
+    0 20px 50px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+
+.desk-page-flip {
+  position: relative;
+  z-index: 2;
+  transform-style: preserve-3d;
+  border-radius: 0 0 14px 14px;
+  overflow: visible;
+  will-change: transform;
+}
+
+.desk-page-flip-inner {
+  position: relative;
+  width: 100%;
+  transform-style: preserve-3d;
+  border-radius: 0 0 14px 14px;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 8px 24px rgba(0, 0, 0, 0.12),
+    0 20px 50px rgba(0, 0, 0, 0.15);
+}
+
+.desk-page-flip-front,
+.desk-page-flip-back {
+  position: relative;
+  width: 100%;
+  backface-visibility: hidden;
+  border-radius: 0 0 14px 14px;
+  overflow: hidden;
+}
+
+.desk-page-flip-back {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  transform: rotateX(180deg);
+  transform-origin: top center;
+  background: #f5f5f4;
+  box-shadow: inset 0 0 0 1px #e7e5e4;
+}
+
+/* Trang khổ ngang: trái ảnh, phải nội dung */
+.desk-page {
+  background: #fff;
+  display: flex;
+  flex-direction: row;
+  min-height: 320px;
+}
+
+.desk-page-landscape {
+  aspect-ratio: 16 / 10;
+  min-height: 300px;
+}
+
+.desk-page-back {
+  background: #fafaf9;
+}
+
+/* Phần ảnh bên trái */
+.desk-page-image {
+  position: relative;
+  width: 42%;
+  flex-shrink: 0;
+  overflow: hidden;
+  background: linear-gradient(135deg, #fed7aa 0%, #fdba74 100%);
+}
+
+.desk-page-image img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.desk-page-image-overlay {
+  position: absolute;
+  inset: 0;
   background: linear-gradient(
     to right,
-    rgba(2, 6, 23, 0.92),
-    rgba(15, 23, 42, 0.9)
+    transparent 40%,
+    rgba(0, 0, 0, 0.15) 100%
   );
+  pointer-events: none;
 }
 
-.month-label {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #f97316;
+/* Ý nghĩa: khi ghi trực tiếp trên ảnh */
+.desk-meaning-overlay {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 10px;
+  display: flex;
+  justify-content: flex-start;
+  pointer-events: none;
 }
 
-.month-topic {
-  font-size: 0.8rem;
-  color: #9ca3af;
-  text-align: right;
+.desk-meaning-chip {
+  max-width: 96%;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.62);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.75rem;
+  line-height: 1.25;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
-.month-card-back {
-  transform: rotateY(180deg);
+/* Phần nội dung bên phải: pill tháng/năm + note + lịch */
+.desk-page-content {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  background: radial-gradient(circle at top, rgba(248, 250, 252, 0.95), rgba(226, 232, 240, 0.92));
+  min-width: 0;
+  padding: 14px 16px 16px;
+  background: #fff;
 }
 
-.month-back-header {
-  padding: 10px 14px 4px;
+.desk-page-back .desk-page-content {
+  background: #fafaf9;
 }
 
-.month-back-header h3 {
-  margin: 0;
-  font-size: 1rem;
+.desk-headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.desk-month-pill {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #fff 0%, #fff7ed 100%);
+  border: 1px solid #fed7aa;
+  box-shadow: 0 10px 24px rgba(234, 88, 12, 0.12);
+}
+
+.desk-month-num {
+  font-size: 1.15rem;
+  font-weight: 900;
+  color: #ea580c;
+  letter-spacing: 0.04em;
+}
+
+.desk-month-text {
+  font-size: 0.9rem;
+  font-weight: 700;
   color: #0f172a;
 }
 
-.month-back-header p {
-  margin: 4px 0 0;
+.desk-month-year {
   font-size: 0.8rem;
-  color: rgba(15, 23, 42, 0.7);
+  font-weight: 700;
+  color: #78716c;
 }
 
-.month-calendar-grid {
+.desk-topic-note {
+  margin: 0 0 8px;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: #fffbeb;
+  border: 1px dashed #fbbf24;
+  color: #b45309;
+  font-size: 0.8rem;
+  line-height: 1.35;
+}
+
+.desk-meaning-outside {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  background: #fff;
+  border: 1px solid #e7e5e4;
+  color: #44403c;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.06);
+}
+
+/* ---- Layout variants (nhiều cách bố trí ảnh) ---- */
+.layout-diagonal-left .desk-page-image {
+  width: 44%;
+  clip-path: polygon(0 0, 100% 0, 86% 100%, 0 100%);
+}
+
+.layout-diagonal-right .desk-page-image {
+  width: 44%;
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 14% 100%);
+}
+
+.layout-split-top {
+  flex-direction: column;
+}
+
+.layout-split-top .desk-page-image {
+  width: 100%;
+  height: 180px;
+}
+
+.layout-split-top .desk-page-content {
+  padding-top: 12px;
+}
+
+.layout-split-bottom {
+  flex-direction: column-reverse;
+}
+
+.layout-split-bottom .desk-page-image {
+  width: 100%;
+  height: 170px;
+}
+
+.layout-full-bleed .desk-page-image {
+  width: 48%;
+}
+
+.layout-full-bleed .desk-page-image-overlay {
+  background: linear-gradient(to right, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.22));
+}
+
+.layout-badge-corner .desk-page-image {
+  width: 40%;
+}
+
+.layout-badge-corner .desk-page-content {
+  position: relative;
+}
+
+.layout-poster .desk-page-image {
+  width: 50%;
+}
+
+.layout-poster .desk-topic-note {
+  background: #fff;
+  border-style: solid;
+  border-color: #fed7aa;
+  color: #0f172a;
+}
+
+.desk-page-grid-wrap {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 4px 10px 8px;
+  gap: 6px;
+  min-height: 0;
 }
 
 .weekdays-row {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
-  margin-bottom: 4px;
 }
 
 .weekday-cell {
   text-align: center;
-  font-size: 0.68rem;
+  font-size: 0.6rem;
+  font-weight: 700;
+  color: #78716c;
   text-transform: uppercase;
-  color: rgba(15, 23, 42, 0.65);
 }
 
 .days-grid {
-  flex: 1;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 2px;
+  flex: 1;
+  min-height: 100px;
 }
 
 .day-cell {
   position: relative;
-  min-height: 28px;
+  min-height: 24px;
   border-radius: 6px;
-  background: rgba(2, 6, 23, 0.06);
+  background: #fefce8;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 0.72rem;
-  color: rgba(15, 23, 42, 0.9);
+  font-size: 0.65rem;
+  color: #1c1917;
+  border: 1px solid #fef08a;
 }
 
 .day-cell.empty {
   background: transparent;
+  border-color: transparent;
+}
+
+.day-cell.weekend {
+  background: #fff7ed;
+  color: #ea580c;
+  border-color: #fed7aa;
 }
 
 .day-cell.holiday {
-  background: radial-gradient(circle at top, rgba(251, 191, 36, 0.25), rgba(248, 113, 113, 0.18));
-  color: rgba(153, 27, 27, 0.95);
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #b45309;
+  border-color: #fcd34d;
 }
 
-.day-number {
-  font-weight: 600;
+.day-num {
+  font-weight: 700;
 }
 
 .day-lunar {
-  font-size: 0.55rem;
-  color: rgba(15, 23, 42, 0.55);
+  font-size: 0.48rem;
+  color: #a8a29e;
 }
 
-.day-holiday-dot {
+.day-dot {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  background: #f97316;
-  box-shadow: 0 0 0 4px rgba(248, 113, 113, 0.35);
+  top: 2px;
+  right: 2px;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #ea580c;
 }
 
-.month-back-footer {
-  padding: 4px 10px 10px;
-  font-size: 0.7rem;
-  color: rgba(15, 23, 42, 0.6);
+/* Chân đế */
+.desk-stand {
+  width: 68%;
+  margin: 0 auto;
+  height: 44px;
+  background: linear-gradient(180deg, #44403c 0%, #292524 55%, #1c1917 100%);
+  clip-path: polygon(20% 0, 80% 0, 100% 100%, 0 100%);
+  box-shadow:
+    0 10px 28px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
-.calendar-hint {
-  margin-top: 12px;
+.desk-hint {
+  margin-top: 16px;
   font-size: 0.8rem;
-  color: #9ca3af;
+  color: #78716c;
   text-align: center;
-  padding: 0 16px;
 }
 
-@media (max-width: 900px) {
-  .month-card-wrapper {
-    height: min(540px, 72vh);
+@media (max-width: 768px) {
+  .desk-calendar-scene {
+    max-width: 100%;
+  }
+
+  .desk-calendar-3d {
+    transform: perspective(1800px) rotateX(6deg) rotateY(0deg);
+  }
+
+  .desk-page-landscape {
+    aspect-ratio: 4 / 3;
+    min-height: 280px;
+  }
+
+  .desk-page-image {
+    width: 38%;
+  }
+
+  .metaverse-back {
+    height: 190px;
   }
 }
 
-@media (max-width: 640px) {
-  .calendar-controls {
+@media (max-width: 480px) {
+  .desk-page {
     flex-direction: column;
-    gap: 10px;
+    min-height: 420px;
   }
 
-  .month-card-wrapper {
-    height: min(520px, 76vh);
+  .desk-page-landscape {
+    aspect-ratio: auto;
+    min-height: 400px;
+  }
+
+  .desk-page-image {
+    width: 100%;
+    height: 160px;
+    flex-shrink: 0;
+  }
+
+  .desk-page-image img {
+    position: absolute;
+    width: 100%;
+    height: 100%;
   }
 }
-

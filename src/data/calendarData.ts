@@ -18,7 +18,7 @@ export type MonthTheme = {
   meaningPlacement: MeaningPlacement;
 };
 
-const AVAILABLE_IMAGES = new Set([1, 2, 3, 4, 5, 10]);
+const AVAILABLE_IMAGES = new Set([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
 const FALLBACK_CYCLE = [1, 2, 3, 4, 5];
 const getImagePath = (month: number) => {
   if (AVAILABLE_IMAGES.has(month)) return `/images/thang${month}.jpg`;

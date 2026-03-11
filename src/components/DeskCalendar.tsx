@@ -33,14 +33,14 @@ export default function DeskCalendar() {
   const handleReset = useCallback(() => navRef.current?.resetView(), []);
 
   return (
-    <div className="relative h-[85vh] min-h-[620px] w-full">
+    <div className="relative h-[92vh] min-h-[680px] w-full">
       <Canvas
         shadows
         dpr={[1, 2]}
         gl={{ antialias: true }}
         camera={{
-          position: [0.3, 0.35, 2.3],
-          fov: 38,
+          position: [0.3, 0.35, 2.05],
+          fov: 36,
           near: 0.1,
           far: 100,
         }}

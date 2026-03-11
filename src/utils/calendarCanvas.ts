@@ -13,9 +13,11 @@ const WEEKDAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 
 export type CalendarLayout = "A" | "B" | "C" | "D";
 
-const LAYOUT_ORDER: CalendarLayout[] = ["A", "B", "C", "D"];
 export function getLayoutForMonth(month: number): CalendarLayout {
-  return LAYOUT_ORDER[(month - 1) % 4];
+  // Keep a consistent design like month 1: large image on the left + calendar grid on the right.
+  // This also ensures the requested monthly photos are clearly visible.
+  void month;
+  return "A";
 }
 
 function wrapText(
@@ -115,7 +117,7 @@ function drawGrid(
   const dayAreaTop = area.top + weekdayH + 4;
   const dayAreaH = area.height - weekdayH - 4;
   const cellH = dayAreaH / numRows;
-  const lunarFontSize = Math.max(14, fontSize * 0.45);
+  const lunarFontSize = Math.max(14, fontSize * 0.44);
 
   ctx.font = `bold ${Math.max(20, fontSize * 0.72)}px ${FONT}`;
   ctx.textBaseline = "middle";
@@ -208,10 +210,14 @@ function drawGrid(
     ctx.fillText(String(day), cx, cy);
 
     const lunar = getLunarDay(day, month, year);
-    ctx.font = `${lunarFontSize}px ${FONT}`;
-    ctx.fillStyle =
-      isHoliday || isSun ? "#f87171" : isSat ? "#60a5fa" : "#9ca3af";
-    ctx.fillText(String(lunar.day), cx, cy + fontSize * 0.72);
+    ctx.save();
+    ctx.font = `bold ${lunarFontSize}px ${FONT}`;
+    ctx.fillStyle = isHoliday || isSun ? "#ef4444" : isSat ? "#2563eb" : "#4b5563";
+    ctx.shadowColor = "rgba(0,0,0,0.20)";
+    ctx.shadowBlur = 3;
+    ctx.shadowOffsetY = 1;
+    ctx.fillText(`${lunar.day}/${lunar.month}`, cx, cy + fontSize * 0.72);
+    ctx.restore();
   });
 }
 

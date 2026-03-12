@@ -65,20 +65,19 @@ export function usePageFlip({ pageCount }: Options): PageFlipApi {
     const cur = new Vector2(e.clientX, e.clientY);
     const dy = drag.current.start.y - cur.y;
     
-    // Lưu độ mạnh của cử chỉ kéo, animation chỉ xuất hiện khi thả tay
+    // Lưu độ mạnh của cử chỉ kéo
     if (dy > 0) {
-      // Kéo lên - đánh dấu để sang tháng sau
+      // Kéo lên - hiển thị animation 80% để tạo hiệu ứng chân thật
       const t = MathUtils.clamp(dy / 160, 0, 1);
       dragStrengthRef.current = t;
       flipDirectionRef.current = -1;
-      // Không animate trong khi kéo
-      api.start({ rot: 0, immediate: true });
+      // Animate 80% của lực kéo
+      api.start({ rot: -t * Math.PI * 0.8, immediate: true });
     } else {
-      // Kéo xuống - đánh dấu để về tháng trước
+      // Kéo xuống - không animate trong khi kéo
       const t = MathUtils.clamp(Math.abs(dy) / 160, 0, 1);
       dragStrengthRef.current = t;
       flipDirectionRef.current = 1;
-      // Không animate trong khi kéo
       api.start({ rot: 0, immediate: true });
     }
   };

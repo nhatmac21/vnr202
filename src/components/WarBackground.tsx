@@ -51,6 +51,30 @@ export default function WarBackground() {
     let animationFrame: number;
     let time = 0;
 
+    // Hàm vẽ ngôi sao 5 cánh
+    const drawStar = (ctx: CanvasRenderingContext2D, size: number, fillStyle: string) => {
+      const spikes = 5;
+      const outerRadius = size;
+      const innerRadius = size * 0.4;
+      
+      ctx.beginPath();
+      for (let i = 0; i < spikes * 2; i++) {
+        const radius = i % 2 === 0 ? outerRadius : innerRadius;
+        const angle = (i * Math.PI) / spikes - Math.PI / 2;
+        const x = Math.cos(angle) * radius;
+        const y = Math.sin(angle) * radius;
+        
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
+      }
+      ctx.closePath();
+      ctx.fillStyle = fillStyle;
+      ctx.fill();
+    };
+
     const animate = () => {
       time += 0.01;
       ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -76,23 +100,14 @@ export default function WarBackground() {
         ctx.rotate(p.rotation);
 
         if (p.type === 'leaf') {
-          // Draw leaf shape
-          ctx.fillStyle = `rgba(${100 + Math.sin(p.x) * 40}, ${120 + Math.sin(p.y) * 30}, 60, 1)`;
-          ctx.beginPath();
-          ctx.ellipse(0, 0, p.size, p.size * 0.6, 0, 0, Math.PI * 2);
-          ctx.fill();
+          // Ngôi sao vàng nhạt
+          drawStar(ctx, p.size, `rgba(${200 + Math.sin(p.x) * 30}, ${180 + Math.sin(p.y) * 30}, 100, 1)`);
         } else if (p.type === 'dust') {
-          // Draw dust particle
-          ctx.fillStyle = 'rgba(200, 180, 140, 1)';
-          ctx.beginPath();
-          ctx.arc(0, 0, p.size, 0, Math.PI * 2);
-          ctx.fill();
+          // Ngôi sao đỏ
+          drawStar(ctx, p.size, 'rgba(220, 120, 80, 1)');
         } else {
-          // Draw spark
-          ctx.fillStyle = 'rgba(255, 200, 100, 1)';
-          ctx.beginPath();
-          ctx.arc(0, 0, p.size, 0, Math.PI * 2);
-          ctx.fill();
+          // Ngôi sao vàng sáng
+          drawStar(ctx, p.size, 'rgba(255, 220, 120, 1)');
         }
 
         ctx.restore();

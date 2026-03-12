@@ -23,22 +23,22 @@ export default function HistoricalOverlay() {
         </svg>
       </div>
 
-      {/* Star burst decorations - representing spirit */}
+      {/* Star 5-pointed decorations - representing spirit */}
       <div className="absolute top-20 left-10 w-16 h-16 opacity-10 animate-pulse-slow">
         <svg viewBox="0 0 100 100" className="text-yellow-500">
-          <path d="M50,0 L58,42 L100,50 L58,58 L50,100 L42,58 L0,50 L42,42 Z" fill="currentColor"/>
+          <path d="M50,5 L61,38 L95,38 L68,58 L79,91 L50,71 L21,91 L32,58 L5,38 L39,38 Z" fill="currentColor"/>
         </svg>
       </div>
       
       <div className="absolute bottom-32 right-20 w-12 h-12 opacity-10 animate-pulse-slow" style={{animationDelay: '1s'}}>
         <svg viewBox="0 0 100 100" className="text-red-600">
-          <path d="M50,0 L58,42 L100,50 L58,58 L50,100 L42,58 L0,50 L42,42 Z" fill="currentColor"/>
+          <path d="M50,5 L61,38 L95,38 L68,58 L79,91 L50,71 L21,91 L32,58 L5,38 L39,38 Z" fill="currentColor"/>
         </svg>
       </div>
 
       <div className="absolute top-1/2 right-1/4 w-10 h-10 opacity-10 animate-pulse-slow" style={{animationDelay: '2s'}}>
         <svg viewBox="0 0 100 100" className="text-yellow-600">
-          <path d="M50,0 L58,42 L100,50 L58,58 L50,100 L42,58 L0,50 L42,42 Z" fill="currentColor"/>
+          <path d="M50,5 L61,38 L95,38 L68,58 L79,91 L50,71 L21,91 L32,58 L5,38 L39,38 Z" fill="currentColor"/>
         </svg>
       </div>
 

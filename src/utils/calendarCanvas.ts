@@ -5,8 +5,8 @@ import { HOLIDAYS_2026 } from "../data/calendarData";
 import { getLunarDay } from "./lunarCalendar";
 
 export const CW = 2048;
-export const CH = Math.round(CW * 0.70 / 1.8);
-export const PADDING_TOP = Math.round(CH * 0.08);
+export const CH = Math.round(CW * 1.5);
+export const PADDING_TOP = Math.round(CH * 0.05);
 
 const FONT = "'Segoe UI', system-ui, Arial, sans-serif";
 const WEEKDAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
@@ -14,10 +14,9 @@ const WEEKDAYS = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"];
 export type CalendarLayout = "A" | "B" | "C" | "D";
 
 export function getLayoutForMonth(month: number): CalendarLayout {
-  // Keep a consistent design like month 1: large image on the left + calendar grid on the right.
-  // This also ensures the requested monthly photos are clearly visible.
+  // Use layout B: large image on top + calendar grid on bottom (like wall calendar)
   void month;
-  return "A";
+  return "B";
 }
 
 function wrapText(
@@ -365,26 +364,104 @@ function drawLayoutB(
   year: number,
   img: HTMLImageElement | null
 ) {
+  // Background
   ctx.fillStyle = "#fefce8";
   ctx.fillRect(0, 0, CW, CH);
-  const headerH = 82;
-  drawHeader(ctx, theme.month, year, 0, PADDING_TOP, CW, headerH);
-  const imgH = Math.round((CH - PADDING_TOP - headerH) * 0.34);
-  drawImageArea(ctx, img, 8, PADDING_TOP + headerH + 6, CW - 16, imgH - 10);
-  const captionH = 64;
-  ctx.fillStyle = "rgba(0,0,0,0.65)";
-  ctx.fillRect(8, PADDING_TOP + headerH + 6 + imgH - captionH - 10, CW - 16, captionH);
+  
+  // Image area - 58% of height with rounded corners
+  const imgH = Math.round(CH * 0.58);
+  const imgPadding = 20;
+  
+  if (img) {
+    ctx.save();
+    roundRect(ctx, imgPadding, imgPadding, CW - imgPadding * 2, imgH - imgPadding * 2, 16);
+    ctx.clip();
+    const scale = Math.max((CW - imgPadding * 2) / img.width, (imgH - imgPadding * 2) / img.height);
+    const sw = img.width * scale;
+    const sh = img.height * scale;
+    const x = imgPadding + (CW - imgPadding * 2 - sw) / 2;
+    const y = imgPadding + (imgH - imgPadding * 2 - sh) / 2;
+    ctx.drawImage(img, x, y, sw, sh);
+    ctx.restore();
+    
+    // Caption overlay at bottom of image
+    const captionH = 85;
+    const captionY = imgH - captionH - imgPadding;
+    ctx.fillStyle = "rgba(0, 0, 0, 0.9)";
+    ctx.fillRect(imgPadding, captionY, CW - imgPadding * 2, captionH);
+    
+    // Caption text
+    ctx.fillStyle = "#ffffff";
+    ctx.font = `bold 32px ${FONT}`;
+    ctx.textBaseline = "top";
+    ctx.textAlign = "left";
+    ctx.fillText(theme.topic, imgPadding + 30, captionY + 15);
+    
+    ctx.fillStyle = "#e5e7eb";
+    ctx.font = `600 22px ${FONT}`;
+    wrapText(ctx, theme.meaning, imgPadding + 30, captionY + 52, CW - imgPadding * 2 - 60, 26, 1);
+    
+    // Border around image
+    ctx.strokeStyle = "#d1d5db";
+    ctx.lineWidth = 3;
+    roundRect(ctx, imgPadding, imgPadding, CW - imgPadding * 2, imgH - imgPadding * 2, 16);
+    ctx.stroke();
+  } else {
+    roundRect(ctx, imgPadding, imgPadding, CW - imgPadding * 2, imgH - imgPadding * 2, 16);
+    ctx.fillStyle = "#f3f4f6";
+    ctx.fill();
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = `bold 40px ${FONT}`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText("Đang tải ảnh...", CW / 2, imgH / 2);
+    ctx.textAlign = "left";
+  }
+  
+  // Calendar section background - 40% of height
+  const calTop = imgH;
+  const calH = CH - imgH;
   ctx.fillStyle = "#ffffff";
-  ctx.font = `bold 22px ${FONT}`;
+  ctx.fillRect(0, calTop, CW, calH);
+  
+  // Top row: Year and Month on same line
+  const headerH = Math.round(calH * 0.22);
+  const yearFontSize = Math.round(headerH * 0.75);
+  const monthFontSize = Math.round(headerH * 0.70);
+  
+  // Year on left
+  ctx.fillStyle = "#1f2937";
+  ctx.font = `bold ${yearFontSize}px ${FONT}`;
   ctx.textBaseline = "middle";
   ctx.textAlign = "left";
-  ctx.fillText(theme.topic, 22, PADDING_TOP + headerH + imgH - captionH / 2 - 6);
-  ctx.textAlign = "left";
-  const gridTop = PADDING_TOP + headerH + imgH + 8;
+  ctx.fillText(String(year), 40, calTop + headerH / 2);
+  
+  // Month name on right
+  const monthNames = ["THÁNG 1", "THÁNG 2", "THÁNG 3", "THÁNG 4", 
+                      "THÁNG 5", "THÁNG 6", "THÁNG 7", "THÁNG 8",
+                      "THÁNG 9", "THÁNG 10", "THÁNG 11", "THÁNG 12"];
+  ctx.fillStyle = "#3b82f6";
+  ctx.font = `bold ${monthFontSize}px ${FONT}`;
+  ctx.textBaseline = "middle";
+  ctx.textAlign = "right";
+  ctx.fillText(monthNames[theme.month - 1], CW - 40, calTop + headerH / 2);
+  
+  // Divider line
+  ctx.strokeStyle = "#d1d5db";
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(30, calTop + headerH);
+  ctx.lineTo(CW - 30, calTop + headerH);
+  ctx.stroke();
+  
+  // Calendar grid
+  const gridTop = calTop + headerH + 20;
+  const gridH = calH - headerH - 30;
+  
   drawGrid(
     ctx,
-    { left: 16, top: gridTop, width: CW - 32, height: CH - gridTop - 8 },
-    theme.month, year, 36
+    { left: 30, top: gridTop, width: CW - 60, height: gridH },
+    theme.month, year, 50
   );
 }
 
@@ -513,10 +590,13 @@ export function hitTestDayCell(
       height: CH - bodyTop - 16,
     };
   } else if (layout === "B") {
-    const headerH = 82;
-    const imgH = Math.round((CH - PADDING_TOP - headerH) * 0.34);
-    const gridTop = PADDING_TOP + headerH + imgH + 8;
-    gridArea = { left: 16, top: gridTop, width: CW - 32, height: CH - gridTop - 8 };
+    const imgH = Math.round(CH * 0.58);
+    const calTop = imgH;
+    const calH = CH - imgH;
+    const headerH = Math.round(calH * 0.22);
+    const gridTop = calTop + headerH + 20;
+    const gridH = calH - headerH - 30;
+    gridArea = { left: 30, top: gridTop, width: CW - 60, height: gridH };
   } else if (layout === "C") {
     const gridTop = PADDING_TOP + 142;
     gridArea = { left: 20, top: gridTop, width: CW - 40, height: CH - gridTop - 12 };
@@ -586,6 +666,65 @@ export function useCalendarTexture(
       texture.dispose();
     };
   }, [theme.month, year, effectiveLayout]);
+
+  return tex;
+}
+
+export function useCoverTexture(imagePath: string): THREE.CanvasTexture | null {
+  const [tex, setTex] = useState<THREE.CanvasTexture | null>(null);
+
+  useEffect(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = CW;
+    canvas.height = CH;
+    const ctx = canvas.getContext("2d")!;
+
+    // Fill with white background
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, CW, CH);
+
+    const texture = new THREE.CanvasTexture(canvas);
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.minFilter = THREE.LinearFilter;
+    texture.magFilter = THREE.LinearFilter;
+    texture.anisotropy = 16;
+    texture.generateMipmaps = false;
+    setTex(texture);
+
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      // Clear canvas
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, CW, CH);
+
+      // Scale image to fit canvas while maintaining aspect ratio
+      const imgRatio = img.width / img.height;
+      const canvasRatio = CW / CH;
+      
+      let drawWidth, drawHeight;
+      if (imgRatio > canvasRatio) {
+        // Image is wider - fit to width
+        drawWidth = CW;
+        drawHeight = CW / imgRatio;
+      } else {
+        // Image is taller - fit to height
+        drawHeight = CH;
+        drawWidth = CH * imgRatio;
+      }
+
+      const x = (CW - drawWidth) / 2;
+      const y = (CH - drawHeight) / 2;
+      
+      ctx.drawImage(img, x, y, drawWidth, drawHeight);
+      texture.needsUpdate = true;
+    };
+    img.src = imagePath;
+
+    return () => {
+      texture.dispose();
+    };
+  }, [imagePath]);
 
   return tex;
 }

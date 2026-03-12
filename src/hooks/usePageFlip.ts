@@ -64,15 +64,11 @@ export function usePageFlip({ pageCount }: Options): PageFlipApi {
     if (!isDraggingRef.current) return;
     const cur = new Vector2(e.clientX, e.clientY);
     const dy = drag.current.start.y - cur.y;
-    const t = MathUtils.clamp(Math.abs(dy) / 160, 0, 1);
+    const t = MathUtils.clamp(dy / 160, 0, 1);
     dragStrengthRef.current = t;
-    if (dy > 0) {
-      flipDirectionRef.current = -1;
-      api.start({ rot: -t * Math.PI, immediate: true });
-    } else {
-      flipDirectionRef.current = 1;
-      api.start({ rot: t * Math.PI, immediate: true });
-    }
+    // Chỉ cho phép lật lên (dy > 0) để sang tháng sau.
+    flipDirectionRef.current = -1;
+    api.start({ rot: -t * Math.PI, immediate: true });
   };
 
   const onPagePointerUp = () => {
@@ -82,7 +78,6 @@ export function usePageFlip({ pageCount }: Options): PageFlipApi {
     const currentRot = rot.get();
     const dir = flipDirectionRef.current;
     const shouldForward = dir === -1 && currentRot < -0.25 * Math.PI;
-    const shouldBackward = dir === 1 && currentRot > 0.25 * Math.PI;
 
     if (shouldForward) {
       animatingRef.current = true;
@@ -93,19 +88,6 @@ export function usePageFlip({ pageCount }: Options): PageFlipApi {
       setTimeout(() => {
         if (!animatingRef.current) return;
         setActiveIndex((i) => (i + 1) % pageCount);
-        api.set({ rot: 0 });
-        dragStrengthRef.current = 0;
-        animatingRef.current = false;
-      }, 600);
-    } else if (shouldBackward) {
-      animatingRef.current = true;
-      api.start({
-        rot: Math.PI,
-        config: { tension: 200, friction: 26 },
-      });
-      setTimeout(() => {
-        if (!animatingRef.current) return;
-        setActiveIndex((i) => (i - 1 + pageCount) % pageCount);
         api.set({ rot: 0 });
         dragStrengthRef.current = 0;
         animatingRef.current = false;
@@ -150,7 +132,7 @@ export function usePageFlip({ pageCount }: Options): PageFlipApi {
 
   return {
     activeIndex,
-    activeMonth: activeIndex + 1,
+    activeMonth: activeIndex,
     visiblePages,
     rot,
     onPagePointerDown,

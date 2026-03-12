@@ -9,12 +9,12 @@ import { usePageFlip } from "../hooks/usePageFlip";
 import { a } from "@react-spring/three";
 
 const CAL = {
-  baseWidth: 1.6,
-  baseDepth: 0.85,
-  baseHeight: 0.60,
-  hingeY: 0.61,
+  baseWidth: 1.25,
+  baseDepth: 1.1,
+  baseHeight: 1.15,
+  hingeY: 1.15,
   hingeZ: 0.06,
-  liftY: 0.15,
+  liftY: 1.55,
 };
 
 type NavApi = {
@@ -33,19 +33,19 @@ export default function DeskCalendar() {
   const handleReset = useCallback(() => navRef.current?.resetView(), []);
 
   return (
-    <div className="relative h-[92vh] min-h-[680px] w-full">
+    <div className="relative h-screen min-h-[800px] w-full overflow-hidden">
       <Canvas
         shadows
         dpr={[1, 2]}
         gl={{ antialias: true }}
         camera={{
-          position: [0.3, 0.35, 2.05],
-          fov: 36,
+          position: [0, 1.95, 2.6],
+          fov: 50,
           near: 0.1,
           far: 100,
         }}
         onCreated={({ camera }) => {
-          camera.lookAt(0, 0.35, 0.10);
+          camera.lookAt(0, 1.85, 0);
         }}
         style={{ touchAction: "none" }}
       >
@@ -78,7 +78,7 @@ export default function DeskCalendar() {
           >
             <planeGeometry args={[50, 50]} />
             <meshStandardMaterial
-              color="#faf5ef"
+              color="#fff7ed"
               roughness={0.9}
               metalness={0}
             />
@@ -96,7 +96,7 @@ export default function DeskCalendar() {
             ← Tháng trước
           </button>
           <span className="rounded-full bg-red-800/90 px-3 py-1.5 text-xs font-bold text-amber-300 shadow-md">
-            Tháng {String(activeMonth).padStart(2, "0")} / 2026
+            {activeMonth === 0 ? "Năm 2026" : `Tháng ${String(activeMonth).padStart(2, "0")} / 2026`}
           </span>
           <button
             className="pointer-events-auto rounded-full bg-white/85 px-3 py-1.5 text-xs font-medium text-stone-600 shadow-md backdrop-blur transition hover:bg-white hover:text-stone-900"
@@ -130,7 +130,7 @@ function SceneCalendar({
   onMonthChange: (m: number) => void;
 }) {
   const orbit = useDragRotate();
-  const flip = usePageFlip({ pageCount: 12 });
+  const flip = usePageFlip({ pageCount: 13 });
 
   useEffect(() => {
     navRef.current = {
@@ -142,7 +142,9 @@ function SceneCalendar({
   }, [flip.flipForward, flip.flipBackward, orbit.resetView, flip.activeMonth, navRef]);
 
   useEffect(() => {
-    onMonthChange(flip.activeMonth);
+    // Month 0 is cover, actual months start from index 1
+    const displayMonth = flip.activeMonth === 0 ? 0 : flip.activeMonth;
+    onMonthChange(displayMonth);
   }, [flip.activeMonth, onMonthChange]);
 
   return (

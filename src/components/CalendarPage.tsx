@@ -8,6 +8,7 @@ import type { DragRotateApi } from "../hooks/useDragRotate";
 import { MONTH_THEMES } from "../data/calendarData";
 import {
   useCalendarTexture,
+  useCoverTexture,
   hitTestDayCell,
   getLayoutForMonth,
   type DayCellInfo,
@@ -24,8 +25,9 @@ type Props = {
   hingeZ?: number;
 };
 
-const PAPER = { w: 1.8, h: 0.70 };
-const FRONT_FACE_ANGLE = Math.atan(0.17 / 0.60);
+// Tờ lịch dạng dọc như lịch treo tường
+const PAPER = { w: 1.3, h: 1.7 };
+const FRONT_FACE_ANGLE = Math.atan(0.25 / 0.70);
 
 export default function CalendarPage({
   index,
@@ -37,9 +39,10 @@ export default function CalendarPage({
   hingeY = 0.61,
   hingeZ = 0.06,
 }: Props) {
-  const theme = MONTH_THEMES[index];
+  const isCover = index === 0;
+  const theme = isCover ? MONTH_THEMES[0] : MONTH_THEMES[index - 1];
   const group = useRef<Group>(null);
-  const layout = getLayoutForMonth(theme.month);
+  const layout = isCover ? "B" : getLayoutForMonth(theme.month);
   const [tooltip, setTooltip] = useState<DayCellInfo | null>(null);
   const tooltipTimer = useRef<ReturnType<typeof setTimeout>>();
 
@@ -75,11 +78,12 @@ export default function CalendarPage({
   );
 
   const calTex = useCalendarTexture(theme, 2026, layout);
+  const coverTex = useCoverTexture("/images/anhbia.jpg");
 
   useEffect(() => {
-    frontMat.map = calTex;
+    frontMat.map = isCover ? coverTex : calTex;
     frontMat.needsUpdate = true;
-  }, [calTex, frontMat]);
+  }, [calTex, coverTex, frontMat, isCover]);
 
   const isTopPage = index === flip.activeIndex;
   const pageThickness = 0.005;
@@ -99,7 +103,8 @@ export default function CalendarPage({
     (e: any) => {
       e.stopPropagation();
 
-      if (e.uv) {
+      // Only enable hit testing for calendar pages, not cover
+      if (!isCover && e.uv) {
         const hit = hitTestDayCell(e.uv.x, e.uv.y, theme.month, 2026, layout);
         if (hit && hit.holiday) {
           setTooltip(hit);
@@ -132,7 +137,7 @@ export default function CalendarPage({
         document.removeEventListener("pointerup", onDocUp);
       };
     },
-    [flip, orbit, index, theme.month, layout]
+    [flip, orbit, index, theme.month, layout, isCover]
   );
 
   useFrame(() => {

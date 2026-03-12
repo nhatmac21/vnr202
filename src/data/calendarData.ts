@@ -138,18 +138,27 @@ export const MONTH_THEMES: MonthTheme[] = [
 
 export const HOLIDAYS_2026 = [
   { date: "2026-01-01", name: "Tết Dương lịch" },
+  { date: "2026-01-27", name: "Ngày Giỗ Tổ Trần Hưng Đạo (20/8 âm lịch 2025)" },
   { date: "2026-02-03", name: "Ngày thành lập Đảng Cộng sản Việt Nam" },
   { date: "2026-02-16", name: "Tất niên - 30 Tết (29 tháng Chạp)" },
   { date: "2026-02-17", name: "Mùng 1 Tết Nguyên Đán Bính Ngọ 2026" },
   { date: "2026-02-18", name: "Mùng 2 Tết Nguyên Đán" },
   { date: "2026-02-19", name: "Mùng 3 Tết Nguyên Đán" },
   { date: "2026-02-20", name: "Mùng 4 Tết Nguyên Đán" },
+  { date: "2026-02-27", name: "Ngày Thầy thuốc Việt Nam" },
+  { date: "2026-03-08", name: "Ngày Quốc tế Phụ nữ 8/3" },
+  { date: "2026-03-26", name: "Ngày thành lập Đoàn TNCS Hồ Chí Minh" },
   { date: "2026-04-26", name: "Giỗ Tổ Hùng Vương (10/3 âm lịch)" },
   { date: "2026-04-30", name: "Ngày Giải phóng miền Nam, Thống nhất đất nước" },
   { date: "2026-05-01", name: "Ngày Quốc tế Lao động" },
   { date: "2026-05-19", name: "Ngày sinh Chủ tịch Hồ Chí Minh" },
+  { date: "2026-06-01", name: "Ngày Quốc tế Thiếu nhi" },
+  { date: "2026-07-27", name: "Ngày Thương binh - Liệt sĩ" },
   { date: "2026-08-27", name: "Lễ Vu Lan - Rằm tháng 7 âm lịch" },
+  { date: "2026-09-02", name: "Quốc khánh nước CHXHCN Việt Nam" },
   { date: "2026-09-25", name: "Tết Trung Thu - Rằm tháng 8 âm lịch" },
-  { date: "2026-09-02", name: "Quốc khánh nước CHXHCN Việt Nam" }
+  { date: "2026-10-20", name: "Ngày Phụ nữ Việt Nam" },
+  { date: "2026-11-20", name: "Ngày Nhà giáo Việt Nam" },
+  { date: "2026-12-22", name: "Ngày thành lập Quân đội Nhân dân Việt Nam" }
 ];
 

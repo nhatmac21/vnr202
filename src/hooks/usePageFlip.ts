@@ -64,22 +64,34 @@ export function usePageFlip({ pageCount }: Options): PageFlipApi {
     if (!isDraggingRef.current) return;
     const cur = new Vector2(e.clientX, e.clientY);
     const dy = drag.current.start.y - cur.y;
-    const t = MathUtils.clamp(dy / 160, 0, 1);
-    dragStrengthRef.current = t;
-    // Chỉ cho phép lật lên (dy > 0) để sang tháng sau.
-    flipDirectionRef.current = -1;
-    api.start({ rot: -t * Math.PI, immediate: true });
+    
+    // Lưu độ mạnh của cử chỉ kéo, animation chỉ xuất hiện khi thả tay
+    if (dy > 0) {
+      // Kéo lên - đánh dấu để sang tháng sau
+      const t = MathUtils.clamp(dy / 160, 0, 1);
+      dragStrengthRef.current = t;
+      flipDirectionRef.current = -1;
+      // Không animate trong khi kéo
+      api.start({ rot: 0, immediate: true });
+    } else {
+      // Kéo xuống - đánh dấu để về tháng trước
+      const t = MathUtils.clamp(Math.abs(dy) / 160, 0, 1);
+      dragStrengthRef.current = t;
+      flipDirectionRef.current = 1;
+      // Không animate trong khi kéo
+      api.start({ rot: 0, immediate: true });
+    }
   };
 
   const onPagePointerUp = () => {
     if (!isDraggingRef.current) return;
     isDraggingRef.current = false;
     setIsDragging(false);
-    const currentRot = rot.get();
     const dir = flipDirectionRef.current;
-    const shouldForward = dir === -1 && currentRot < -0.25 * Math.PI;
+    const strength = dragStrengthRef.current;
 
-    if (shouldForward) {
+    if (dir === -1 && strength > 0.25) {
+      // Kéo lên đủ mạnh - lật sang tháng sau
       animatingRef.current = true;
       api.start({
         rot: -Math.PI,
@@ -92,7 +104,23 @@ export function usePageFlip({ pageCount }: Options): PageFlipApi {
         dragStrengthRef.current = 0;
         animatingRef.current = false;
       }, 600);
+    } else if (dir === 1 && strength > 0.25) {
+      // Kéo xuống đủ mạnh - quay về tháng trước
+      // Chuyển ngay sang tháng trước và animate trang từ phía sau
+      const prevIndex = (activeIndex - 1 + pageCount) % pageCount;
+      setActiveIndex(prevIndex);
+      animatingRef.current = true;
+      api.set({ rot: Math.PI });
+      api.start({
+        rot: 0,
+        config: { tension: 200, friction: 26 },
+      });
+      setTimeout(() => {
+        dragStrengthRef.current = 0;
+        animatingRef.current = false;
+      }, 600);
     } else {
+      // Không đủ mạnh - quay về vị trí ban đầu
       api.start({ rot: 0 });
       dragStrengthRef.current = 0;
     }

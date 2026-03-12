@@ -13,7 +13,7 @@ export default function TriangularBase({
   height = 0.60,
 }: Props) {
   const geom = useMemo(() => {
-    const frontZ = depth * 0.25;
+    const frontZ = depth * 0.6;
     const backZ = -depth * 0.75;
     const ridgeZ = depth * 0.05;
 

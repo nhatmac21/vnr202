@@ -9,9 +9,9 @@ import { usePageFlip } from "../hooks/usePageFlip";
 import { a } from "@react-spring/three";
 
 const CAL = {
-  baseWidth: 1.25,
-  baseDepth: 1.1,
-  baseHeight: 1.15,
+  baseWidth: 1.2,
+  baseDepth: 1,
+  baseHeight: 1.6,  // Tăng từ 1.15 lên 1.7 để bằng chiều cao lịch
   hingeY: 1.15,
   hingeZ: 0.06,
   liftY: 1.55,
@@ -33,23 +33,23 @@ export default function DeskCalendar() {
   const handleReset = useCallback(() => navRef.current?.resetView(), []);
 
   return (
-    <div className="relative h-screen min-h-[800px] w-full overflow-hidden">
+    <div className="relative h-screen min-h-[800px] w-full overflow-hidden" style={{ background: 'transparent' }}>
       <Canvas
         shadows
         dpr={[1, 2]}
-        gl={{ antialias: true }}
+        gl={{ antialias: true, alpha: true, preserveDrawingBuffer: true }}
         camera={{
           position: [0, 1.95, 2.6],
           fov: 50,
           near: 0.1,
           far: 100,
         }}
-        onCreated={({ camera }) => {
+        onCreated={({ camera, gl }) => {
           camera.lookAt(0, 1.85, 0);
+          gl.setClearColor(0x000000, 0);
         }}
-        style={{ touchAction: "none" }}
+        style={{ touchAction: "none", background: "transparent" }}
       >
-        <color attach="background" args={["#fff7ed"]} />
         <ambientLight intensity={0.5} />
         <directionalLight
           position={[3, 6, 5]}
@@ -58,15 +58,15 @@ export default function DeskCalendar() {
           shadow-mapSize={[2048, 2048]}
           shadow-bias={-0.0002}
         />
-        <directionalLight position={[-2, 3, -1]} intensity={0.25} />
-        <pointLight position={[0, 2, 3]} intensity={0.15} decay={2} />
+        <directionalLight position={[-2, 3, -1]} intensity={0.3} />
+        <pointLight position={[0, 2, 3]} intensity={0.2} decay={2} />
 
         <Suspense fallback={null}>
-          <Environment preset="city" />
+          <Environment preset="city" background={false} />
           <SceneCalendar navRef={navRef} onMonthChange={setActiveMonth} />
           <ContactShadows
             position={[0, -0.18, 0]}
-            opacity={0.5}
+            opacity={0.4}
             scale={25}
             blur={2.5}
             far={4}
@@ -78,9 +78,11 @@ export default function DeskCalendar() {
           >
             <planeGeometry args={[50, 50]} />
             <meshStandardMaterial
-              color="#fff7ed"
-              roughness={0.9}
-              metalness={0}
+              color="#1a1410"
+              roughness={0.95}
+              metalness={0.05}
+              opacity={0.15}
+              transparent
             />
           </mesh>
         </Suspense>
@@ -150,11 +152,13 @@ function SceneCalendar({
   return (
     <group position={[0, CAL.liftY, 0]}>
       <a.group rotation={orbit.rotation as any}>
-        <TriangularBase
-          width={CAL.baseWidth}
-          depth={CAL.baseDepth}
-          height={CAL.baseHeight}
-        />
+        <group position={[0, -0.45, 0]}>
+          <TriangularBase
+            width={CAL.baseWidth}
+            depth={CAL.baseDepth}
+            height={CAL.baseHeight}
+          />
+        </group>
         <BindingRings
           width={CAL.baseWidth}
           hinge={[0, CAL.hingeY, CAL.hingeZ]}
